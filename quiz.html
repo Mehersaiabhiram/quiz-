@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futuristic Quiz App</title>
+    <style>
+        /* General Styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 450px;
+            width: 100%;
+            padding: 25px;
+            border-radius: 15px;
+            background: rgba(20, 20, 20, 0.9);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            display: none; /* Hidden by default */
+        }
+
+        .container.active {
+            display: block; /* Display only the active container */
+        }
+
+        /* Futuristic Effects */
+        h1, h2 {
+            background: linear-gradient(to right, #a445b2, #fa4299);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            background: linear-gradient(90deg, #12c2e9, #c471ed, #f64f59);
+            color: white;
+            box-shadow: 0 5px 15px rgba(246, 79, 89, 0.3);
+            transition: all 0.4s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(246, 79, 89, 0.5);
+        }
+
+        .input-group {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .input-group input::placeholder {
+            color: #aaa;
+        }
+
+        .input-group input:focus {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Error Message */
+        .error-message {
+            color: red;
+            margin-top: 15px;
+            font-size: 14px;
+            display: none; /* Hidden by default */
+        }
+
+        /* Quiz Options */
+        .quiz-option {
+            background: rgba(30, 30, 30, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 15px;
+            margin: 10px 0;
+            cursor: pointer;
+            color: #fff;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover {
+            background: rgba(30, 30, 30, 1);
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+
+        .quiz-option.correct {
+            border-color: #00ff00;
+        }
+
+        .quiz-option.incorrect {
+            border-color: #ff0000;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            margin: 20px 0;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar-inner {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #4e54c8, #8f94fb);
+            transition: width 0.4s ease;
+        }
+
+        /* Scorecard */
+        .score-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            margin-top: 20px;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        .score-icon img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 15px;
+            animation: bounce 2s infinite;
+        }
+
+        .score-text {
+            font-size: 18px;
+            color: #bbb;
+        }
+
+        .score-number {
+            font-size: 48px;
+            font-weight: bold;
+            background: linear-gradient(90deg, #f64f59, #c471ed, #12c2e9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .message {
+            font-size: 16px;
+            margin-top: 10px;
+            color: #ddd;
+        }
+
+        /* Timer Styling */
+        .timer-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+
+        .timer-progress {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
+
+        .timer-svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .timer-circle-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 8;
+        }
+
+        .timer-circle {
+            fill: none;
+            stroke: #12c2e9;
+            stroke-width: 8;
+            stroke-dasharray: 283;
+            stroke-dashoffset: 283;
+            transition: stroke-dashoffset 1s linear;
+        }
+
+        .timer-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-15px);
+            }
+            60% {
+                transform: translateY(-8px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container active" id="login-container">
+        <h1>Login to Start</h1>
+        <div class="input-group">
+            <input type="email" id="email" placeholder="Enter your email">
+        </div>
+        <div class="input-group">
+            <input type="password" id="password" placeholder="Enter your password">
+        </div>
+        <button class="btn" onclick="startQuiz()">Start Quiz</button>
+        <div id="error-message" class="error-message">Incorrect email or password. Please try again.</div>
+    </div>
+
+    <div class="container" id="quiz-container">
+        <h2 id="question">Question</h2>
+        <div class="timer-container">
+            <div class="timer-progress">
+                <svg class="timer-svg" viewBox="0 0 100 100">
+                    <circle class="timer-circle-bg" cx="50" cy="50" r="45"></circle>
+                    <circle class="timer-circle" cx="50" cy="50" r="45"></circle>
+                </svg>
+                <span class="timer-text" id="timer-text">30</span>
+            </div>
+        </div>
+        <div class="quiz-options">
+            <button class="quiz-option" onclick="selectAnswer(0)">Option 1</button>
+            <button class="quiz-option" onclick="selectAnswer(1)">Option 2</button>
+            <button class="quiz-option" onclick="selectAnswer(2)">Option 3</button>
+            <button class="quiz-option" onclick="selectAnswer(3)">Option 4</button>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-bar-inner" id="progress-bar"></div>
+        </div>
+    </div>
+
+    <div class="container" id="score-container">
+        <h1>🎉 Quiz Complete! 🎉</h1>
+        <div class="score-card">
+            <h2>Your Performance</h2>
+            <p class="score-text">You scored:</p>
+            <p class="score-number"><span id="score">0</span> / 14</p>
+            <p class="message">Great effort! Try again to beat your score!</p>
+        </div>
+        <button class="btn" onclick="restartQuiz()">Play Again</button>
+    </div>
+
+    <script>
+        // Predefined credentials
+        const correctEmail = "user@example.com";
+        const correctPassword = "password123";
+
+        let currentQuestion = 0;
+        let score = 0;
+        let timer;
+        let timeLeft = 30; // Time per question in seconds
+        const timerCircle = document.querySelector('.timer-circle');
+        const timerText = document.getElementById('timer-text');
+
+        const questions = [
+            { question: "What is the capital of France?", options: ["Paris", "London", "Berlin", "Madrid"], answer: 0 },
+            { question: "What is 2+2?", options: ["3", "4", "5", "6"], answer: 1 },
+            { question: "In a survey, 60% of 1,200 respondents prefer online shopping. How many people prefer online shopping?", options: ["480", "720", "600", "750"], answer: 1 },
+            { question: "What is the total population density of a region if the population is 500,000 and the area is 250 square kilometers?", options: ["200 people per square kilometer", "500 people per square kilometer", "2,000 people per square kilometer", "1,000 people per square kilometer"], answer: 1 },
+            { question: "What is the chemical formula for water?", options: ["CO₂", "H₂O", "O₂", "H₂SO₄"], answer: 1 },
+            { question: "Which planet is known as the 'Red Planet'?", options: ["Venus", "Jupiter", "Mars", "Saturn"], answer: 2 },
+            { question: "What is the powerhouse of the cell?", options: ["Nucleus", "Ribosome", "Mitochondria", "Endoplasmic Reticulum"], answer: 2 },
+            { question: "Which gas do plants absorb from the atmosphere during photosynthesis?", options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"], answer: 1 },
+            { question: "What is the SI unit of force?", options: ["Joule", "Newton", "Pascal", "Watt"], answer: 1 },
+            { question: "What is the boiling point of water at sea level?", options: ["90°C", "100°C", "120°C", "150°C"], answer: 1 },
+            { question: "Who invented the telephone?", options: ["Thomas Edison", "Alexander Graham Bell", "Nikola Tesla", "Albert Einstein"], answer: 1 },
+            { question: "What is the distance between the Earth and the Sun?", options: ["93 million km", "150 million km", "200 million km", "250 million km"], answer: 1 },
+            { question: "What element does 'O' represent on the periodic table?", options: ["Oxygen", "Osmium", "Ozone", "Oganesson"], answer: 0 },
+            { question: "Which part of the plant conducts photosynthesis?", options: ["Roots", "Stem", "Leaves", "Flowers"], answer: 2 }
+        ];
+
+        // Shuffle function to randomize the questions
+        function shuffleQuestions() {
+            for (let i = questions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [questions[i], questions[j]] = [questions[j], questions[i]]; // Swap
+            }
+        }
+
+        function startQuiz() {
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            if (email === correctEmail && password === correctPassword) {
+                shuffleQuestions(); // Shuffle questions at the start of the quiz
+                document.getElementById('login-container').classList.remove('active');
+                document.getElementById('quiz-container').classList.add('active');
+                loadQuestion();
+                document.getElementById('error-message').style.display = 'none'; // Hide error message
+            } else {
+                document.getElementById('error-message').style.display = 'block'; // Show error message
+            }
+        }
+
+        function startTimer() {
+            timeLeft = 30; // Reset timer for each question
+            timerText.textContent = timeLeft;
+            timerCircle.style.strokeDashoffset = 283; // Reset the circle progress
+
+            timer = setInterval(() => {
+                timeLeft--;
+                timerText.textContent = timeLeft;
+                const offset = (283 * (30 - timeLeft)) / 30; // Update circle progress
+                timerCircle.style.strokeDashoffset = 283 - offset;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    skipQuestion();
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timer);
+        }
+
+        function skipQuestion() {
+            stopTimer();
+            currentQuestion++;
+            if (currentQuestion < questions.length) {
+                loadQuestion();
+            } else {
+                showScore();
+            }
+        }
+
+        function loadQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('question').innerText = question.question;
+
+            const options = document.querySelectorAll('.quiz-option');
+            for (let i = 0; i < options.length; i++) {
+                options[i].innerText = question.options[i];
+            }
+
+            const progressBar = document.getElementById('progress-bar');
+            progressBar.style.width = ((currentQuestion / questions.length) * 100) + '%';
+
+            startTimer(); // Start the timer for the new question
+        }
+
+        function selectAnswer(index) {
+            stopTimer(); // Stop the timer when an answer is selected
+
+            const question = questions[currentQuestion];
+            const options = document.querySelectorAll('.quiz-option');
+            if (index === question.answer) {
+                score++;
+                options[index].classList.add('correct');
+            } else {
+                options[index].classList.add('incorrect');
+                options[question.answer].classList.add('correct');
+            }
+
+            currentQuestion++;
+
+            if (currentQuestion < questions.length) {
+                setTimeout(() => {
+                    loadQuestion();
+                    clearOptionStyles();
+                }, 1000);
+            } else {
+                setTimeout(() => {
+                    showScore();
+                }, 1000);
+            }
+        }
+
+        function clearOptionStyles() {
+            const options = document.querySelectorAll('.quiz-option');
+            options.forEach(option => {
+                option.classList.remove('correct', 'incorrect');
+            });
+        }
+
+        function showScore() {
+            document.getElementById('quiz-container').classList.remove('active');
+            document.getElementById('score-container').classList.add('active');
+            document.getElementById('score').innerText = score;
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            document.getElementById('score-container').classList.remove('active');
+            document.getElementById('login-container').classList.add('active');
+        }
+    </script>
+</body>
+</html>
